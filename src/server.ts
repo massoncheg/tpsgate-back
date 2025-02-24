@@ -21,11 +21,12 @@ mongoose
   .then(() => console.log('MongoDB connected'))
   .catch((err) => console.error('MongoDB connection error:', err));
 
-// Используем маршруты
+// Маршруты
 app.use('/weekdays', timeRoutes);
 app.use('/login', loginRoutes);
 app.use('/open', openRoutes);
 
+// Запуск сервера
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });

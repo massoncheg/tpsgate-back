@@ -1,27 +1,22 @@
+import { UserLogin, UserLoginModel } from "../models/UserData";
 import express from "express";
 import { Request, Response, NextFunction } from "express";
+import dotenv from "dotenv";
 
 import jwt from "jsonwebtoken";
+dotenv.config();
 
 const router = express.Router();
+const SECRET_KEY = process.env.JWT_SECRET_KEY;
 
-const SECRET_KEY = "your_secret_key"; // Лучше вынести в .env
-
-// Жестко заданные пользователи
-const users = [
-  { email: "user1@some.com", password: "0000" },
-  { email: "user2@some.com", password: "0000" },
-];
+if (!SECRET_KEY) throw new Error("server doesn't have secret key in .env");
 
 // Авторизация пользователя
 router.post("/", async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password } = req.body as UserLogin;
 
-    // Проверяем, есть ли пользователь в списке
-    const user = users.find(
-      (u) => u.email === email && u.password === password
-    );
+    const user = UserLoginModel.findOne({ email, password });
 
     if (!user) {
       res.status(401).json({ error: "Неверные учетные данные" });
@@ -29,40 +24,40 @@ router.post("/", async (req, res) => {
     }
 
     // Генерация токена
-    const token = jwt.sign({ email }, SECRET_KEY, { expiresIn: "1h" });
+    const token = jwt.sign({ email }, SECRET_KEY, { expiresIn: "24h" });
 
     res.status(200).json({ token });
   } catch (error) {
     res.status(500).json({ error: "Ошибка сервера" });
   }
 });
-router.post("/validate", async (req, res) => {
+router.get("/validate", async (req, res) => {
   try {
-    const { token } = req.body;
-    
+    const token = req.header("Authorization")?.split(" ")[1];
+
     if (!token) {
       res.status(400).json({ error: "В запросе не было токена" });
       return;
     }
+
     jwt.verify(token, SECRET_KEY, (err: jwt.VerifyErrors | null) => {
       if (err) {
         res.status(403).json({ error: "Недействительный токен" });
         return;
       }
-      res.status(200).send();
+      res.status(200).json({ valid: true });
     });
   } catch (error) {
     res.status(500).json({ error: "Ошибка сервера" });
   }
 });
 
-// Middleware для проверки токена (если понадобится)
+// Middleware для проверки токена
 export const authenticateToken = (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
-  console.log(req.header("Authorization"));
   const token = req.header("Authorization")?.split(" ")[1];
 
   if (!token) {

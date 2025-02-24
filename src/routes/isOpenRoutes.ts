@@ -2,9 +2,8 @@ import express from "express";
 
 import { isAfter, isBefore, parse, format } from "date-fns";
 import { WeekDayModel } from "../models/WeekDay";
+import { TZDate } from "@date-fns/tz";
 const router = express.Router();
-
-const baseDate = "2000-01-01"; // Используем фиктивный день
 
 const weekDays = [
   "Понедельник",
@@ -17,41 +16,29 @@ const weekDays = [
 ];
 const todayIs = weekDays[0];
 
-// function parseTime(time: string): Date {
-//   return parse(time, "HH:mm", new Date());
-// }
-function checkTime(startTime: string, endTime: string): boolean {
-  // Текущее время в формате HH:mm
-  const now = new Date();
+// Примечание - Сначала сделал реализацию TZDate, но сам путался тк по умолчанию использовался какой-то усреднённый часовой пояс
+function checkTime(
+  startTime: string,
+  endTime: string,
+  timeZone = "Europe/Moscow"
+): boolean {
+  // Текущее время в указанном часовом поясе
+  const now = new TZDate(new Date(), timeZone);
 
-  const currentTimeStr = format(now, "HH:mm");
-  const baseDate = format(now, "yyyy-MM-dd");
+  // Парсим время начала и окончания в указанном часовом поясе
+  const startDate = new TZDate(parse(startTime, "HH:mm", now), timeZone);
+  const endDate = new TZDate(parse(endTime, "HH:mm", now), timeZone);
 
-  // Так как у нас абстрактный день недели берём фиктивную
-  console.log(baseDate);
-
-  const startDate = parse(`${baseDate} ${startTime}`, "yyyy-MM-dd HH:mm", now);
-  const endDate = parse(`${baseDate} ${endTime}`, "yyyy-MM-dd HH:mm", now);
-  const currentDate = parse(
-    `${baseDate} ${currentTimeStr}`,
-    "yyyy-MM-dd HH:mm",
-    now
-  );
-
-  console.log(currentTimeStr);
-  console.log(startTime, endTime);
-  console.log(startDate, endDate);
-  console.log(currentDate);
-
-  return isAfter(currentDate, startDate) && isBefore(currentDate, endDate);
+  // Проверяем, находится ли текущее время между startDate и endDate
+  return isAfter(now, startDate) && isBefore(now, endDate);
 }
 async function getTodaysTimeRange() {
-  // const weekDay = await WeekDayModel.findOne({ title: todayIs });
-  const weekDay = { timeRange: { startTime: "00:00", endTime: "23:00" } };
+  const weekDay = await WeekDayModel.findOne({ title: todayIs });
+
   if (!weekDay) return null;
   return weekDay.timeRange;
 }
-// Получаем попадаем ли мы в расписанием
+// Получаем попадаем ли мы в расписание
 router.get("/", async (req, res) => {
   try {
     const range = await getTodaysTimeRange();
@@ -64,7 +51,7 @@ router.get("/", async (req, res) => {
       return;
     }
 
-    res.status(403).json({ error: "Отказано в доступе" });
+    res.status(403).json({ error: "Отказано в доступе!" });
   } catch (error) {
     res.status(500).json({ error: "Ошибка сервера" });
   }
