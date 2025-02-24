@@ -5,7 +5,7 @@ export interface UserLogin {
   password: string;
 }
 
-const UserLoginSchema = new mongoose.Schema<UserLogin>({
+const UserSchema = new mongoose.Schema<UserLogin>({
   email: {
     type: String,
     required: true,
@@ -13,4 +13,4 @@ const UserLoginSchema = new mongoose.Schema<UserLogin>({
   password: { type: String, required: true },
 });
 
-export const UserLoginModel = mongoose.model("UserLogin", UserLoginSchema);
+export const UserLoginModel = mongoose.model("User", UserSchema);
