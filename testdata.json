@@ -1,0 +1,51 @@
+[
+  {
+    "title": "Понедельник",
+    "timeRange": {
+      "startTime": "04:20",
+      "endTime": "05:00"
+    }
+  },
+  {
+    "title": "Вторник",
+    "timeRange": {
+      "startTime": "04:20",
+      "endTime": "05:00"
+    }
+  },
+  {
+    "title": "Среда",
+    "timeRange": {
+      "startTime": "04:20",
+      "endTime": "05:00"
+    }
+  },
+  {
+    "title": "Четверг",
+    "timeRange": {
+      "startTime": "04:20",
+      "endTime": "05:00"
+    }
+  },
+  {
+    "title": "Пятница",
+    "timeRange": {
+      "startTime": "04:20",
+      "endTime": "05:00"
+    }
+  },
+  {
+    "title": "Суббота",
+    "timeRange": {
+      "startTime": "04:20",
+      "endTime": "05:00"
+    }
+  },
+  {
+    "title": "Воскресенье",
+    "timeRange": {
+      "startTime": "04:20",
+      "endTime": "05:00"
+    }
+  }
+]
